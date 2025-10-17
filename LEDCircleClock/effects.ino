@@ -51,7 +51,7 @@ void executeEffect(int choice) {
     case 3: fire(); break;
     case 4: snake(); break;
     case 5: maze(); break;
-    case 6: digiclock(); break;
+    case 6: digiclock(false); break;
     case 7: bomb(); break;
     case 8: ticTacToe(); break;
     case 9: drain(); break;
@@ -64,6 +64,7 @@ void executeEffect(int choice) {
     case 16: throbber(); break;
     case 17: meteorShower(); break;
     case 100: colorPicker(); break; // 100 = hidden developer option (not shown as effect), use/trigger using http://ip-address/color
+    case 101: digiclock(true); break; // 101 = test nigt mode display
     default: break;
   }
 }

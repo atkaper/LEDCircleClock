@@ -169,6 +169,7 @@ void setup() {
   server.on("/wifi", handleWifi);
   server.on("/effect", handleEffect);
   server.on("/color", handleColorPicker);
+  server.on("/night", handleNightModeTest);
   server.on("/demo", handleDemoMode);
   server.on("/toggle-pause", handleTogglePause);
   server.begin();
@@ -208,13 +209,19 @@ void loop() {
   }
   
   // suppress effects in the night between 22.00 and 8:00
-  if (demoMode == -1 && (timeinfo -> tm_hour) >= 8 && (timeinfo -> tm_hour) <= 21) {
+  boolean nightMode = (timeinfo -> tm_hour) < 8 || (timeinfo -> tm_hour) >= 22;
+  if (demoMode == -1 && !nightMode) {
     if (previousEffectTime != currentTime) {
       previousEffectTime = currentTime;
       if (random(30) == 0) {
         executeRandomEffect();
       }
     }
+  }
+
+  // show digiclock in night mode during the night between 22.00 and 8:00, this one does not flash/blink, and uses darker color for the digits.
+  if (demoMode == -1 && nightMode) {
+    digiclock(true);
   }
 
   if (demoMode >= 0 && currentTime > previousEffectTime) {
@@ -231,5 +238,9 @@ void loop() {
 
   server.handleClient();
   handleOta();
-  updateClockHands();
+
+  if (demoMode != -1 || !nightMode) {
+    // show the normal analog clock
+    updateClockHands();
+  }
 }

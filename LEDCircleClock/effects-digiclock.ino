@@ -22,6 +22,10 @@
 #define DIGICLOCK_COLON2     RgbColor(0, 14, 30)
 #define DIGICLOCK_PENDULUM   RgbColor(0, 14, 30)
 
+#define DIGICLOCK_IMAGE_NIGHT  RgbColor(0, 0, 1)
+#define DIGICLOCK_COLON_NIGHT  RgbColor(0, 1, 1)
+#define DIGICLOCK_DIGITS_NIGHT RgbColor(1, 0, 1)
+
 // 7 segment definitions for numbers 0..9
 // The segments are numbered like this:
 // 
@@ -116,8 +120,8 @@ const uint8_t image[][2] = {
 
 #define membersof(x) (sizeof(x) / sizeof(x[0]))
 
-// Draw clock, background image, and pendulum.
-void digiclock() {
+// Draw clock, background image, and pendulum. If nightMode == true, then use darker digit color, and do not flash/animate.
+void digiclock(boolean nightMode) {
   time_t digiTime = time(nullptr);
   struct tm * digiTimeInfo;
   
@@ -127,7 +131,7 @@ void digiclock() {
     strip.ClearTo(DIGICLOCK_BACKGROUND);
 
     // Show background image
-    digiclockDrawArcs(image, membersof(image), DIGICLOCK_IMAGE);
+    digiclockDrawArcs(image, membersof(image), nightMode ? DIGICLOCK_IMAGE_NIGHT : DIGICLOCK_IMAGE);
 
     // Get us the current time
     digiTime = time(nullptr); // time_t = seconds since epoch
@@ -143,25 +147,35 @@ void digiclock() {
 
     // show the digits
     for (int d=0; d<4;d++) {
-      digiclockDrawDigit(d, splitDigits[d]);
+      digiclockDrawDigit(d, splitDigits[d], nightMode);
     }
 
     // show pendulum (and flashing colon)
-    digiclockDrawPendulum();
+    if(!nightMode) {
+      digiclockDrawPendulum();
+    } else {
+      strip.SetPixelColor(1, DIGICLOCK_COLON_NIGHT);
+      strip.SetPixelColor(5, DIGICLOCK_COLON_NIGHT);
+    }
     
     strip.Show();
     handlingDelay(50);
+
+    if (nightMode) {
+      // no need runnig 400 times, as there is no animation, and main loop keeps calling this for every frame during night.
+      break;
+    }
   }
 }
 
 // Draw 7-segment digit
-void digiclockDrawDigit(int pos, int value) {
+void digiclockDrawDigit(int pos, int value, boolean nightMode) {
   byte pattern = nrToSegments[value]; // binary bit values: 0ABCDEFG
   for (int bitpos=0; bitpos<7;bitpos++) {
     int bitval = pattern & 1;
     pattern = pattern >> 1;
     if (bitval) {
-      digiclockDrawArcs(segments[pos][bitpos], 3, DIGICLOCK_DIGITS);
+      digiclockDrawArcs(segments[pos][bitpos], 3, nightMode ? DIGICLOCK_DIGITS_NIGHT : DIGICLOCK_DIGITS);
     }
   }
   

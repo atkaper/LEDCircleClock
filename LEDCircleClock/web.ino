@@ -127,6 +127,7 @@ void handleRoot() {
         <form method='post' action='/demo' class='nextline'><input type='submit' value='Demo all'></form>\
         <form method='post' action='/toggle-pause'><input type='submit' value='" + String(pauseLabel) + "'></form>\
         <form method='get' action='/color'><input type='submit' value='color-picker'></form>\
+        <form method='get' action='/night'><input type='submit' value='night-test'></form>\
         <form method='get' action='/wifi'><input type='submit' value='network'></form>\
       </div>");
 
@@ -146,6 +147,13 @@ void handleEffect() {
 void handleDemoMode() {
   // Enable demo mode, this will cycle through all effects in a row.
   demoMode = 0;
+  server.sendHeader("Location", String("/"), true);
+  server.send ( 302, "text/plain", "");
+}
+
+void handleNightModeTest() {
+  triggerEffect = 101;
+  demoMode = -1;
   server.sendHeader("Location", String("/"), true);
   server.send ( 302, "text/plain", "");
 }
